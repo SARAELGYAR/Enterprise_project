@@ -10,8 +10,8 @@ import org.hibernate.annotations.UuidGenerator;
 import java.util.UUID;
 
 @Entity
-@Table(name = "projects")
-public class Project {
+@Table(name = "tasks")
+public class TaskItem {
 
     @Id
     @GeneratedValue
@@ -21,11 +21,14 @@ public class Project {
     @Column(name = "tenant_id", nullable = false)
     private UUID tenantId;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(name = "project_id", nullable = false)
+    private UUID projectId;
 
-    @Column(name = "created_by", nullable = false)
-    private String createdBy;
+    @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
+    private String status;
 
     public UUID getId() {
         return id;
@@ -43,19 +46,27 @@ public class Project {
         this.tenantId = tenantId;
     }
 
-    public String getName() {
-        return name;
+    public UUID getProjectId() {
+        return projectId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setProjectId(UUID projectId) {
+        this.projectId = projectId;
     }
 
-    public String getCreatedBy() {
-        return createdBy;
+    public String getTitle() {
+        return title;
     }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
