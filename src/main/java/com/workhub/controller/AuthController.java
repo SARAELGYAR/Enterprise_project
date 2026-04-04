@@ -1,5 +1,5 @@
 package com.workhub.controller;
-
+import jakarta.validation.Valid;
 import com.workhub.dto.LoginRequest;
 import com.workhub.dto.LoginResponse;
 import com.workhub.service.AuthService;
@@ -21,7 +21,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+   public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
