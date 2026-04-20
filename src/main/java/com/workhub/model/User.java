@@ -24,6 +24,12 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Column(name = "tenant_id", nullable = false)
+    private UUID tenantId;
+
+    @Column(nullable = false)
+    private String roles;
+
     public UUID getId() {
         return id;
     }
@@ -46,5 +52,21 @@ public class User {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public UUID getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(UUID tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public String getRoles() {
+        return roles;
+    }
+
+    public void setRoles(String roles) {
+        this.roles = roles;
     }
 }

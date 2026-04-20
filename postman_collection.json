@@ -1,66 +1,485 @@
 {
   "info": {
-    "name": "WorkHub API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "name": "WorkHub API - Phase 1 Testing",
+    "description": "Complete Postman collection for testing WorkHub Phase 1 requirements including JWT authentication, tenant isolation, and transaction management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "workhub-phase-1"
   },
   "item": [
     {
-      "name": "Login",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
-        },
-        "url": {
-          "raw": "http://localhost:8080/auth/login",
-          "protocol": "http",
-          "host": [
-            "localhost"
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "POST Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('jwt_token', response.token);",
+                  "    pm.collectionVariables.set('tenant_id', '9b75bc93-892e-4a6e-badb-b45ca25162d0');",
+                  "    pm.collectionVariables.set('user_email', 'user@example.com');",
+                  "    pm.test('JWT token received', () => {",
+                  "        pm.expect(response.token).to.be.a('string');",
+                  "        pm.expect(response.token).to.not.be.empty;",
+                  "    });",
+                  "    pm.test('Token contains tenant info', () => {",
+                  "        const tokenParts = response.token.split('.');",
+                  "        const payload = JSON.parse(atob(tokenParts[1]));",
+                  "        pm.expect(payload.tenantId).to.exist;",
+                  "        pm.expect(payload.roles).to.exist;",
+                  "    });",
+                  "} else {",
+                  "    pm.test('Login failed', () => {",
+                  "        pm.expect(pm.response.code).to.equal(200);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
           ],
-          "port": "8080",
-          "path": [
-            "auth",
-            "login"
-          ]
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Current User (/auth/me)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.test('User data received', () => {",
+                  "        pm.expect(response.id).to.exist;",
+                  "        pm.expect(response.email).to.equal('user@example.com');",
+                  "        pm.expect(response.tenantId).to.exist;",
+                  "        pm.expect(response.roles).to.equal('TENANT_ADMIN');",
+                  "    });",
+                  "    pm.test('Tenant isolation working', () => {",
+                  "        pm.expect(response.tenantId).to.equal('9b75bc93-892e-4a6e-badb-b45ca25162d0');",
+                  "    });",
+                  "} else {",
+                  "    pm.test('Get user failed', () => {",
+                  "        pm.expect(pm.response.code).to.equal(200);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/auth/me",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "Get Current User",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{jwt_token}}"
-          },
-          {
-            "key": "X-Tenant-ID",
-            "value": "{{tenant_id}}"
-          }
-        ],
-        "url": {
-          "raw": "http://localhost:8080/auth/me",
-          "protocol": "http",
-          "host": [
-            "localhost"
+      "name": "Projects Management",
+      "item": [
+        {
+          "name": "GET All Projects",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.test('Projects list received', () => {",
+                  "        pm.expect(response).to.be.an('array');",
+                  "    });",
+                  "    pm.test('Tenant isolation working', () => {",
+                  "        if (response.length > 0) {",
+                  "            response.forEach(project => {",
+                  "                pm.expect(project.tenantId).to.equal('9b75bc93-892e-4a6e-badb-b45ca25162d0');",
+                  "            });",
+                  "        }",
+                  "    });",
+                  "} else {",
+                  "    pm.test('Get projects failed', () => {",
+                  "        pm.expect(pm.response.code).to.equal(200);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
           ],
-          "port": "8080",
-          "path": [
-            "auth",
-            "me"
-          ]
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/projects",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "projects"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Project",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('created_project_id', response.id);",
+                  "    pm.test('Project created successfully', () => {",
+                  "        pm.expect(response.id).to.exist;",
+                  "        pm.expect(response.name).to.equal('Test Project from Postman');",
+                  "        pm.expect(response.tenantId).to.equal('9b75bc93-892e-4a6e-badb-b45ca25162d0');",
+                  "    });",
+                  "} else {",
+                  "    pm.test('Create project failed', () => {",
+                  "        pm.expect(pm.response.code).to.equal(200);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Project from Postman\",\n  \"createdBy\": \"user@example.com\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/projects",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "projects"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Project by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.test('Project details received', () => {",
+                  "        pm.expect(response.id).to.exist;",
+                  "        pm.expect(response.tenantId).to.equal('9b75bc93-892e-4a6e-badb-b45ca25162d0');",
+                  "    });",
+                  "} else {",
+                  "    pm.test('Get project by ID failed', () => {",
+                  "        pm.expect(pm.response.code).to.equal(200);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/projects/{{created_project_id}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "projects",
+                "{{created_project_id}}"
+              ]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
+    },
+    {
+      "name": "Transaction Demo",
+      "item": [
+        {
+          "name": "POST Transaction - Success Case",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('transaction_project_id', response.projectId);",
+                  "    pm.test('Transaction successful', () => {",
+                  "        pm.expect(response.projectId).to.exist;",
+                  "        pm.expect(response.message).to.include('created in one transaction');",
+                  "    });",
+                  "} else {",
+                  "    pm.test('Transaction success case failed', () => {",
+                  "        pm.expect(pm.response.code).to.equal(200);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"9b75bc93-892e-4a6e-badb-b45ca25162d0\",\n  \"projectName\": \"Transaction Test Project\",\n  \"createdBy\": \"user@example.com\",\n  \"initialTaskTitle\": \"Initial Task\",\n  \"simulateFailure\": false\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/transaction-demo/projects",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "transaction-demo",
+                "projects"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Transaction - Rollback Demo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Transaction rollback working', () => {",
+                  "    // This should fail with 500 error to demonstrate rollback",
+                  "    pm.expect(pm.response.code).to.equal(500);",
+                  "});",
+                  "pm.test('Rollback error message', () => {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.message).to.include('Simulated failure');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"9b75bc93-892e-4a6e-badb-b45ca25162d0\",\n  \"projectName\": \"Rollback Test Project\",\n  \"createdBy\": \"user@example.com\",\n  \"initialTaskTitle\": \"Should Not Exist\",\n  \"simulateFailure\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/transaction-demo/projects",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "transaction-demo",
+                "projects"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "System Health",
+      "item": [
+        {
+          "name": "GET Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Application is healthy', () => {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.status).to.equal('UP');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/actuator/health",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "actuator",
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tenant_id",
+      "value": "9b75bc93-892e-4a6e-badb-b45ca25162d0",
+      "type": "string"
+    },
+    {
+      "key": "user_email",
+      "value": "user@example.com",
+      "type": "string"
+    },
+    {
+      "key": "created_project_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transaction_project_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Pre-request script to ensure we have a valid token",
+          "if (!pm.collectionVariables.get('jwt_token')) {",
+          "    console.log('No JWT token found, please run Login first');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script",
+          "pm.test('Response time is acceptable', () => {",
+          "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+          "});"
+        ]
+      }
     }
   ]
 }
