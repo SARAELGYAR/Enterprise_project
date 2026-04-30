@@ -1,0 +1,333 @@
+### Tenant Isolation Test Suite
+### This file tests strict tenant isolation for all endpoints
+
+### Variables
+@baseUrl = http://localhost:8080
+@tenant1Token = {{tenant1Login.response.body.token}}
+@tenant2Token = {{tenant2Login.response.body.token}}
+
+### === Authentication Tests ===
+
+### Login as Tenant 1 User
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@tenant1.com",
+  "password": "password123"
+}
+
+> {%
+    client.test("Tenant 1 login successful", function() {
+        client.assert(response.status === 200, "Login failed");
+        client.assert(response.body.token != null, "Token not found");
+        client.global.set("tenant1Token", response.body.token);
+    });
+%}
+
+### Login as Tenant 2 User
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@tenant2.com", 
+  "password": "password123"
+}
+
+> {%
+    client.test("Tenant 2 login successful", function() {
+        client.assert(response.status === 200, "Login failed");
+        client.assert(response.body.token != null, "Token not found");
+        client.global.set("tenant2Token", response.body.token);
+    });
+%}
+
+### === Project Isolation Tests ===
+
+### Create Project for Tenant 1
+POST {{baseUrl}}/projects
+Authorization: Bearer {{tenant1Token}}
+Content-Type: application/json
+
+{
+  "name": "Tenant 1 Project",
+  "createdBy": "admin@tenant1.com"
+}
+
+> {%
+    client.test("Tenant 1 project created", function() {
+        client.assert(response.status === 200, "Project creation failed");
+        client.global.set("tenant1ProjectId", response.body.id);
+    });
+%}
+
+### Create Project for Tenant 2
+POST {{baseUrl}}/projects
+Authorization: Bearer {{tenant2Token}}
+Content-Type: application/json
+
+{
+  "name": "Tenant 2 Project",
+  "createdBy": "admin@tenant2.com"
+}
+
+> {%
+    client.test("Tenant 2 project created", function() {
+        client.assert(response.status === 200, "Project creation failed");
+        client.global.set("tenant2ProjectId", response.body.id);
+    });
+%}
+
+### Get All Projects - Tenant 1 (should only see tenant 1 projects)
+GET {{baseUrl}}/projects
+Authorization: Bearer {{tenant1Token}}
+
+> {%
+    client.test("Tenant 1 can only see their projects", function() {
+        client.assert(response.status === 200, "Failed to get projects");
+        client.assert(response.body.length === 1, "Should only see 1 project");
+        client.assert(response.body[0].name === "Tenant 1 Project", "Wrong project name");
+    });
+%}
+
+### Get All Projects - Tenant 2 (should only see tenant 2 projects)
+GET {{baseUrl}}/projects
+Authorization: Bearer {{tenant2Token}}
+
+> {%
+    client.test("Tenant 2 can only see their projects", function() {
+        client.assert(response.status === 200, "Failed to get projects");
+        client.assert(response.body.length === 1, "Should only see 1 project");
+        client.assert(response.body[0].name === "Tenant 2 Project", "Wrong project name");
+    });
+%}
+
+### Try to access Tenant 2 project as Tenant 1 (should fail)
+GET {{baseUrl}}/projects/{{tenant2ProjectId}}
+Authorization: Bearer {{tenant1Token}}
+
+> {%
+    client.test("Cross-tenant project access blocked", function() {
+        client.assert(response.status === 404 || response.status === 403, "Cross-tenant access should be blocked");
+    });
+%}
+
+### === Task Isolation Tests ===
+
+### Create Task for Tenant 1 Project
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{tenant1Token}}
+Content-Type: application/json
+
+{
+  "title": "Tenant 1 Task",
+  "status": "TODO",
+  "projectId": "{{tenant1ProjectId}}"
+}
+
+> {%
+    client.test("Tenant 1 task created", function() {
+        client.assert(response.status === 200, "Task creation failed");
+        client.global.set("tenant1TaskId", response.body.id);
+    });
+%}
+
+### Create Task for Tenant 2 Project
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{tenant2Token}}
+Content-Type: application/json
+
+{
+  "title": "Tenant 2 Task",
+  "status": "TODO", 
+  "projectId": "{{tenant2ProjectId}}"
+}
+
+> {%
+    client.test("Tenant 2 task created", function() {
+        client.assert(response.status === 200, "Task creation failed");
+        client.global.set("tenant2TaskId", response.body.id);
+    });
+%}
+
+### Get All Tasks - Tenant 1 (should only see tenant 1 tasks)
+GET {{baseUrl}}/tasks
+Authorization: Bearer {{tenant1Token}}
+
+> {%
+    client.test("Tenant 1 can only see their tasks", function() {
+        client.assert(response.status === 200, "Failed to get tasks");
+        client.assert(response.body.length === 1, "Should only see 1 task");
+        client.assert(response.body[0].title === "Tenant 1 Task", "Wrong task title");
+    });
+%}
+
+### Get All Tasks - Tenant 2 (should only see tenant 2 tasks)
+GET {{baseUrl}}/tasks
+Authorization: Bearer {{tenant2Token}}
+
+> {%
+    client.test("Tenant 2 can only see their tasks", function() {
+        client.assert(response.status === 200, "Failed to get tasks");
+        client.assert(response.body.length === 1, "Should only see 1 task");
+        client.assert(response.body[0].title === "Tenant 2 Task", "Wrong task title");
+    });
+%}
+
+### Try to access Tenant 2 task as Tenant 1 (should fail)
+GET {{baseUrl}}/tasks/{{tenant2TaskId}}
+Authorization: Bearer {{tenant1Token}}
+
+> {%
+    client.test("Cross-tenant task access blocked", function() {
+        client.assert(response.status === 404 || response.status === 403, "Cross-tenant access should be blocked");
+    });
+%}
+
+### === User Isolation Tests ===
+
+### Create User for Tenant 1
+POST {{baseUrl}}/users
+Authorization: Bearer {{tenant1Token}}
+Content-Type: application/json
+
+{
+  "email": "user1@tenant1.com",
+  "passwordHash": "password123",
+  "roles": "USER"
+}
+
+> {%
+    client.test("Tenant 1 user created", function() {
+        client.assert(response.status === 200, "User creation failed");
+        client.global.set("tenant1UserId", response.body.id);
+    });
+%}
+
+### Create User for Tenant 2
+POST {{baseUrl}}/users
+Authorization: Bearer {{tenant2Token}}
+Content-Type: application/json
+
+{
+  "email": "user1@tenant2.com",
+  "passwordHash": "password123", 
+  "roles": "USER"
+}
+
+> {%
+    client.test("Tenant 2 user created", function() {
+        client.assert(response.status === 200, "User creation failed");
+        client.global.set("tenant2UserId", response.body.id);
+    });
+%}
+
+### Get All Users - Tenant 1 (should only see tenant 1 users)
+GET {{baseUrl}}/users
+Authorization: Bearer {{tenant1Token}}
+
+> {%
+    client.test("Tenant 1 can only see their users", function() {
+        client.assert(response.status === 200, "Failed to get users");
+        client.assert(response.body.length >= 1, "Should see at least 1 user");
+        // Check that all returned users belong to tenant 1
+        response.body.forEach(user => {
+            client.assert(user.email.includes("@tenant1.com") || user.email === "admin@tenant1.com", "User from wrong tenant");
+        });
+    });
+%}
+
+### Get All Users - Tenant 2 (should only see tenant 2 users)
+GET {{baseUrl}}/users
+Authorization: Bearer {{tenant2Token}}
+
+> {%
+    client.test("Tenant 2 can only see their users", function() {
+        client.assert(response.status === 200, "Failed to get users");
+        client.assert(response.body.length >= 1, "Should see at least 1 user");
+        // Check that all returned users belong to tenant 2
+        response.body.forEach(user => {
+            client.assert(user.email.includes("@tenant2.com") || user.email === "admin@tenant2.com", "User from wrong tenant");
+        });
+    });
+%}
+
+### Try to access Tenant 2 user as Tenant 1 (should fail)
+GET {{baseUrl}}/users/{{tenant2UserId}}
+Authorization: Bearer {{tenant1Token}}
+
+> {%
+    client.test("Cross-tenant user access blocked", function() {
+        client.assert(response.status === 404 || response.status === 403, "Cross-tenant access should be blocked");
+    });
+%}
+
+### === Security Validation Tests ===
+
+### Try to create task with wrong tenant project (should fail)
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{tenant1Token}}
+Content-Type: application/json
+
+{
+  "title": "Invalid Task",
+  "status": "TODO",
+  "projectId": "{{tenant2ProjectId}}"
+}
+
+> {%
+    client.test("Cannot create task for different tenant project", function() {
+        client.assert(response.status === 400, "Should reject task for different tenant project");
+    });
+%}
+
+### Try to access endpoint without token (should fail)
+GET {{baseUrl}}/projects
+
+> {%
+    client.test("Unauthorized access blocked", function() {
+        client.assert(response.status === 401, "Should require authentication");
+    });
+%}
+
+### === Cleanup Tests ===
+
+### Delete Tenant 1 Task
+DELETE {{baseUrl}}/tasks/{{tenant1TaskId}}
+Authorization: Bearer {{tenant1Token}}
+
+> {%
+    client.test("Tenant 1 task deleted", function() {
+        client.assert(response.status === 204, "Task deletion failed");
+    });
+%}
+
+### Delete Tenant 2 Task
+DELETE {{baseUrl}}/tasks/{{tenant2TaskId}}
+Authorization: Bearer {{tenant2Token}}
+
+> {%
+    client.test("Tenant 2 task deleted", function() {
+        client.assert(response.status === 204, "Task deletion failed");
+    });
+%}
+
+### Delete Tenant 1 Project
+DELETE {{baseUrl}}/projects/{{tenant1ProjectId}}
+Authorization: Bearer {{tenant1Token}}
+
+> {%
+    client.test("Tenant 1 project deleted", function() {
+        client.assert(response.status === 204, "Project deletion failed");
+    });
+%}
+
+### Delete Tenant 2 Project
+DELETE {{baseUrl}}/projects/{{tenant2ProjectId}}
+Authorization: Bearer {{tenant2Token}}
+
+> {%
+    client.test("Tenant 2 project deleted", function() {
+        client.assert(response.status === 204, "Project deletion failed");
+    });
+%}
