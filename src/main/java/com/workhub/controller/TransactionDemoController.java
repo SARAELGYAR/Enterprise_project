@@ -4,6 +4,7 @@ import com.workhub.dto.CreateProjectWithTaskRequest;
 import com.workhub.service.ProjectTransactionalService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,7 @@ public class TransactionDemoController {
         this.projectTransactionalService = projectTransactionalService;
     }
 
+    @PreAuthorize("hasRole('TENANT_ADMIN')")
     @PostMapping("/projects")
     public ResponseEntity<Map<String, Object>> createProjectWithTask(@Valid @RequestBody CreateProjectWithTaskRequest request) {
         UUID projectId = projectTransactionalService.createProjectWithInitialTask(request);

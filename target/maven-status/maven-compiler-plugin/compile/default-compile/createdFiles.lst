@@ -9,6 +9,7 @@ com\workhub\service\ProjectTransactionalService.class
 com\workhub\dto\LoginResponse.class
 com\workhub\dto\CreateProjectWithTaskRequest.class
 com\workhub\exception\GlobalExceptionHandler.class
+com\workhub\service\TaskService.class
 com\workhub\service\AuthService.class
 com\workhub\dto\UserResponse.class
 com\workhub\repository\TaskItemRepository.class
@@ -18,8 +19,11 @@ com\workhub\model\Project.class
 com\workhub\repository\ProjectRepository.class
 com\workhub\model\User.class
 com\workhub\service\UserDetailsServiceImpl.class
+com\workhub\controller\UserController.class
 com\workhub\config\DataInitializer.class
 com\workhub\model\Tenant.class
 com\workhub\security\TenantContext.class
 com\workhub\repository\TenantRepository.class
+com\workhub\observability\CorrelationIdFilter.class
+com\workhub\controller\TaskController.class
 com\workhub\controller\AuthController.class

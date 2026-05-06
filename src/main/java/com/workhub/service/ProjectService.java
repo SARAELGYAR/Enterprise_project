@@ -3,7 +3,9 @@ package com.workhub.service;
 import com.workhub.model.Project;
 import com.workhub.repository.ProjectRepository;
 import com.workhub.security.TenantContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +33,7 @@ public class ProjectService {
             throw new IllegalStateException("Tenant context not set");
         }
         return projectRepository.findByIdAndTenantId(id, tenantId)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
     }
 
     public Project createProject(Project project) {
@@ -50,7 +52,7 @@ public class ProjectService {
         }
         
         Project project = projectRepository.findByIdAndTenantId(id, tenantId)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
         
         project.setName(projectDetails.getName());
         // Add other updatable fields as needed
@@ -65,7 +67,7 @@ public class ProjectService {
         }
         
         Project project = projectRepository.findByIdAndTenantId(id, tenantId)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
         
         projectRepository.delete(project);
     }

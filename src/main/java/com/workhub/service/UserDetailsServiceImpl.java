@@ -2,12 +2,15 @@ package com.workhub.service;
 
 import com.workhub.model.User;
 import com.workhub.repository.UserRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -21,11 +24,17 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        return org.springframework.security.core.userdetails.User.withUsername(user.getEmail())
+        // Parse "TENANT_ADMIN,MEMBER" → Spring Security authorities
+        List<SimpleGrantedAuthority> authorities = Arrays.stream(user.getRoles().split(","))
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.trim()))
+                .collect(Collectors.toList());
+
+        return org.springframework.security.core.userdetails.User
+                .withUsername(user.getEmail())
                 .password(user.getPasswordHash())
-                .authorities(Collections.emptyList())
+                .authorities(authorities)
                 .build();
     }
 }

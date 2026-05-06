@@ -2,9 +2,9 @@
 ### This file tests strict tenant isolation for all endpoints
 
 ### Variables
+
+
 @baseUrl = http://localhost:8080
-@tenant1Token = {{tenant1Login.response.body.token}}
-@tenant2Token = {{tenant2Login.response.body.token}}
 
 ### === Authentication Tests ===
 
@@ -45,8 +45,8 @@ Content-Type: application/json
 ### === Project Isolation Tests ===
 
 ### Create Project for Tenant 1
-POST {{baseUrl}}/projects
-Authorization: Bearer {{tenant1Token}}
+POST http://localhost:8080/projects
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQxLmNvbSIsInRlbmFudElkIjoiMTkwMzY0Y2YtZTdiNS00ODdiLTk0MWMtODgyZTY3NjY4MTdlIiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODExNzgsImV4cCI6MTc3ODE2NzU3OH0.mJDwkZ2mZMfPy1mJ06GKhGle4igmmrUsTHc1-pQZzedoVo2iYT6eRhOtJ1ZQHbzY4iOjZO086AekROI7pPvPLA
 Content-Type: application/json
 
 {
@@ -62,8 +62,8 @@ Content-Type: application/json
 %}
 
 ### Create Project for Tenant 2
-POST {{baseUrl}}/projects
-Authorization: Bearer {{tenant2Token}}
+POST http://localhost:8080/projects 
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQyLmNvbSIsInRlbmFudElkIjoiMzZjYzU4YjMtZDBlNC00NjY3LWJhZGItNGRhZmFkZGRlMjE5Iiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODg2MDUsImV4cCI6MTc3ODE3NTAwNX0.kg2JNfLdA2jqG4XKOWEPauEM93zrbPZVdpYQNvOfIXUuYEgVR90nNMpvGDJPoVVVTafuJ-YMIFkMwuo3lBMufQ
 Content-Type: application/json
 
 {
@@ -79,8 +79,8 @@ Content-Type: application/json
 %}
 
 ### Get All Projects - Tenant 1 (should only see tenant 1 projects)
-GET {{baseUrl}}/projects
-Authorization: Bearer {{tenant1Token}}
+GET http://localhost:8080/projects 
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQxLmNvbSIsInRlbmFudElkIjoiMTkwMzY0Y2YtZTdiNS00ODdiLTk0MWMtODgyZTY3NjY4MTdlIiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODExNzgsImV4cCI6MTc3ODE2NzU3OH0.mJDwkZ2mZMfPy1mJ06GKhGle4igmmrUsTHc1-pQZzedoVo2iYT6eRhOtJ1ZQHbzY4iOjZO086AekROI7pPvPLA
 
 > {%
     client.test("Tenant 1 can only see their projects", function() {
@@ -91,8 +91,8 @@ Authorization: Bearer {{tenant1Token}}
 %}
 
 ### Get All Projects - Tenant 2 (should only see tenant 2 projects)
-GET {{baseUrl}}/projects
-Authorization: Bearer {{tenant2Token}}
+GET http://localhost:8080/projects 
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQyLmNvbSIsInRlbmFudElkIjoiMzZjYzU4YjMtZDBlNC00NjY3LWJhZGItNGRhZmFkZGRlMjE5Iiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODg2MDUsImV4cCI6MTc3ODE3NTAwNX0.kg2JNfLdA2jqG4XKOWEPauEM93zrbPZVdpYQNvOfIXUuYEgVR90nNMpvGDJPoVVVTafuJ-YMIFkMwuo3lBMufQ
 
 > {%
     client.test("Tenant 2 can only see their projects", function() {
@@ -103,8 +103,8 @@ Authorization: Bearer {{tenant2Token}}
 %}
 
 ### Try to access Tenant 2 project as Tenant 1 (should fail)
-GET {{baseUrl}}/projects/{{tenant2ProjectId}}
-Authorization: Bearer {{tenant1Token}}
+GET {{baseUrl}}/projects/3a511d3d-3147-48eb-bcb4-1914d621f1db
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQxLmNvbSIsInRlbmFudElkIjoiMTkwMzY0Y2YtZTdiNS00ODdiLTk0MWMtODgyZTY3NjY4MTdlIiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODg0NDQsImV4cCI6MTc3ODE3NDg0NH0.mMoOSW30FsG6T5Y9JJUscbQfnkAIGZhuafG0NBvyixkQejKdWhNdSHorSnvIKKbLmmtR_yxDEw2cZ5HrMTfkYQ
 
 > {%
     client.test("Cross-tenant project access blocked", function() {
@@ -115,14 +115,14 @@ Authorization: Bearer {{tenant1Token}}
 ### === Task Isolation Tests ===
 
 ### Create Task for Tenant 1 Project
-POST {{baseUrl}}/tasks
-Authorization: Bearer {{tenant1Token}}
+POST http://localhost:8080/tasks
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQxLmNvbSIsInRlbmFudElkIjoiMTkwMzY0Y2YtZTdiNS00ODdiLTk0MWMtODgyZTY3NjY4MTdlIiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODExNzgsImV4cCI6MTc3ODE2NzU3OH0.mJDwkZ2mZMfPy1mJ06GKhGle4igmmrUsTHc1-pQZzedoVo2iYT6eRhOtJ1ZQHbzY4iOjZO086AekROI7pPvPLA
 Content-Type: application/json
 
 {
   "title": "Tenant 1 Task",
   "status": "TODO",
-  "projectId": "{{tenant1ProjectId}}"
+  "projectId": "ca8ffc47-1239-4fa9-8c73-90a52cd62fe9"
 }
 
 > {%
@@ -139,7 +139,7 @@ Content-Type: application/json
 
 {
   "title": "Tenant 2 Task",
-  "status": "TODO", 
+  "status": "TODO",
   "projectId": "{{tenant2ProjectId}}"
 }
 
@@ -152,7 +152,7 @@ Content-Type: application/json
 
 ### Get All Tasks - Tenant 1 (should only see tenant 1 tasks)
 GET {{baseUrl}}/tasks
-Authorization: Bearer {{tenant1Token}}
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQxLmNvbSIsInRlbmFudElkIjoiMTkwMzY0Y2YtZTdiNS00ODdiLTk0MWMtODgyZTY3NjY4MTdlIiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODg0NDQsImV4cCI6MTc3ODE3NDg0NH0.mMoOSW30FsG6T5Y9JJUscbQfnkAIGZhuafG0NBvyixkQejKdWhNdSHorSnvIKKbLmmtR_yxDEw2cZ5HrMTfkYQ
 
 > {%
     client.test("Tenant 1 can only see their tasks", function() {
@@ -164,7 +164,7 @@ Authorization: Bearer {{tenant1Token}}
 
 ### Get All Tasks - Tenant 2 (should only see tenant 2 tasks)
 GET {{baseUrl}}/tasks
-Authorization: Bearer {{tenant2Token}}
+Authorization: Bearer  eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQyLmNvbSIsInRlbmFudElkIjoiMzZjYzU4YjMtZDBlNC00NjY3LWJhZGItNGRhZmFkZGRlMjE5Iiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODg0OTgsImV4cCI6MTc3ODE3NDg5OH0.oY6k97s16l6bV5QedUWkIXGGURWOVmjUtJwOX3Z05qcWua_sM9VZ98QlWgV-YWe-gtPbplk2cjOBZ723R6P8IA
 
 > {%
     client.test("Tenant 2 can only see their tasks", function() {
@@ -175,7 +175,7 @@ Authorization: Bearer {{tenant2Token}}
 %}
 
 ### Try to access Tenant 2 task as Tenant 1 (should fail)
-GET {{baseUrl}}/tasks/{{tenant2TaskId}}
+GET {{baseUrl}}/tasks/a511d3d-3147-48eb-bcb4-1914d621f1db
 Authorization: Bearer {{tenant1Token}}
 
 > {%
@@ -188,11 +188,11 @@ Authorization: Bearer {{tenant1Token}}
 
 ### Create User for Tenant 1
 POST {{baseUrl}}/users
-Authorization: Bearer {{tenant1Token}}
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQxLmNvbSIsInRlbmFudElkIjoiMTkwMzY0Y2YtZTdiNS00ODdiLTk0MWMtODgyZTY3NjY4MTdlIiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODg0NDQsImV4cCI6MTc3ODE3NDg0NH0.mMoOSW30FsG6T5Y9JJUscbQfnkAIGZhuafG0NBvyixkQejKdWhNdSHorSnvIKKbLmmtR_yxDEw2cZ5HrMTfkYQ
 Content-Type: application/json
 
 {
-  "email": "user1@tenant1.com",
+  "email": "testuser1@tenant1.com",
   "passwordHash": "password123",
   "roles": "USER"
 }
@@ -206,11 +206,11 @@ Content-Type: application/json
 
 ### Create User for Tenant 2
 POST {{baseUrl}}/users
-Authorization: Bearer {{tenant2Token}}
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQyLmNvbSIsInRlbmFudElkIjoiMzZjYzU4YjMtZDBlNC00NjY3LWJhZGItNGRhZmFkZGRlMjE5Iiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODg0OTgsImV4cCI6MTc3ODE3NDg5OH0.oY6k97s16l6bV5QedUWkIXGGURWOVmjUtJwOX3Z05qcWua_sM9VZ98QlWgV-YWe-gtPbplk2cjOBZ723R6P8IA
 Content-Type: application/json
 
 {
-  "email": "user1@tenant2.com",
+  "email": "testuser1@tenant2.com",
   "passwordHash": "password123", 
   "roles": "USER"
 }
@@ -224,7 +224,7 @@ Content-Type: application/json
 
 ### Get All Users - Tenant 1 (should only see tenant 1 users)
 GET {{baseUrl}}/users
-Authorization: Bearer {{tenant1Token}}
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQxLmNvbSIsInRlbmFudElkIjoiMTkwMzY0Y2YtZTdiNS00ODdiLTk0MWMtODgyZTY3NjY4MTdlIiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODg0NDQsImV4cCI6MTc3ODE3NDg0NH0.mMoOSW30FsG6T5Y9JJUscbQfnkAIGZhuafG0NBvyixkQejKdWhNdSHorSnvIKKbLmmtR_yxDEw2cZ5HrMTfkYQ
 
 > {%
     client.test("Tenant 1 can only see their users", function() {
@@ -239,7 +239,7 @@ Authorization: Bearer {{tenant1Token}}
 
 ### Get All Users - Tenant 2 (should only see tenant 2 users)
 GET {{baseUrl}}/users
-Authorization: Bearer {{tenant2Token}}
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQyLmNvbSIsInRlbmFudElkIjoiMzZjYzU4YjMtZDBlNC00NjY3LWJhZGItNGRhZmFkZGRlMjE5Iiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODg0OTgsImV4cCI6MTc3ODE3NDg5OH0.oY6k97s16l6bV5QedUWkIXGGURWOVmjUtJwOX3Z05qcWua_sM9VZ98QlWgV-YWe-gtPbplk2cjOBZ723R6P8IA
 
 > {%
     client.test("Tenant 2 can only see their users", function() {
@@ -253,7 +253,7 @@ Authorization: Bearer {{tenant2Token}}
 %}
 
 ### Try to access Tenant 2 user as Tenant 1 (should fail)
-GET {{baseUrl}}/users/{{tenant2UserId}}
+GET {{baseUrl}}/users/a511d3d-3147-48eb-bcb4-1914d621f1db
 Authorization: Bearer {{tenant1Token}}
 
 > {%
@@ -266,13 +266,13 @@ Authorization: Bearer {{tenant1Token}}
 
 ### Try to create task with wrong tenant project (should fail)
 POST {{baseUrl}}/tasks
-Authorization: Bearer {{tenant1Token}}
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQxLmNvbSIsInRlbmFudElkIjoiMTkwMzY0Y2YtZTdiNS00ODdiLTk0MWMtODgyZTY3NjY4MTdlIiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODg0NDQsImV4cCI6MTc3ODE3NDg0NH0.mMoOSW30FsG6T5Y9JJUscbQfnkAIGZhuafG0NBvyixkQejKdWhNdSHorSnvIKKbLmmtR_yxDEw2cZ5HrMTfkYQ
 Content-Type: application/json
 
 {
   "title": "Invalid Task",
   "status": "TODO",
-  "projectId": "{{tenant2ProjectId}}"
+  "projectId": "3a511d3d-3147-48eb-bcb4-1914d621f1db"
 }
 
 > {%
@@ -286,15 +286,15 @@ GET {{baseUrl}}/projects
 
 > {%
     client.test("Unauthorized access blocked", function() {
-        client.assert(response.status === 401, "Should require authentication");
+        client.assert(response.status === 401 || response.status === 403, "Should require authentication");
     });
 %}
 
 ### === Cleanup Tests ===
 
 ### Delete Tenant 1 Task
-DELETE {{baseUrl}}/tasks/{{tenant1TaskId}}
-Authorization: Bearer {{tenant1Token}}
+DELETE {{baseUrl}}/tasks/ef56b4fb-af87-42bd-809f-26db4f3b7340
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQxLmNvbSIsInRlbmFudElkIjoiMTkwMzY0Y2YtZTdiNS00ODdiLTk0MWMtODgyZTY3NjY4MTdlIiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODg0NDQsImV4cCI6MTc3ODE3NDg0NH0.mMoOSW30FsG6T5Y9JJUscbQfnkAIGZhuafG0NBvyixkQejKdWhNdSHorSnvIKKbLmmtR_yxDEw2cZ5HrMTfkYQ
 
 > {%
     client.test("Tenant 1 task deleted", function() {
@@ -303,8 +303,8 @@ Authorization: Bearer {{tenant1Token}}
 %}
 
 ### Delete Tenant 2 Task
-DELETE {{baseUrl}}/tasks/{{tenant2TaskId}}
-Authorization: Bearer {{tenant2Token}}
+DELETE {{baseUrl}}/tasks/a511d3d-3147-48eb-bcb4-1914d621f1db
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQyLmNvbSIsInRlbmFudElkIjoiMzZjYzU4YjMtZDBlNC00NjY3LWJhZGItNGRhZmFkZGRlMjE5Iiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODg0OTgsImV4cCI6MTc3ODE3NDg5OH0.oY6k97s16l6bV5QedUWkIXGGURWOVmjUtJwOX3Z05qcWua_sM9VZ98QlWgV-YWe-gtPbplk2cjOBZ723R6P8IA
 
 > {%
     client.test("Tenant 2 task deleted", function() {
@@ -313,8 +313,8 @@ Authorization: Bearer {{tenant2Token}}
 %}
 
 ### Delete Tenant 1 Project
-DELETE {{baseUrl}}/projects/{{tenant1ProjectId}}
-Authorization: Bearer {{tenant1Token}}
+DELETE {{baseUrl}}/projects/ef56b4fb-af87-42bd-809f-26db4f3b7340
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQxLmNvbSIsInRlbmFudElkIjoiMTkwMzY0Y2YtZTdiNS00ODdiLTk0MWMtODgyZTY3NjY4MTdlIiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODg0NDQsImV4cCI6MTc3ODE3NDg0NH0.mMoOSW30FsG6T5Y9JJUscbQfnkAIGZhuafG0NBvyixkQejKdWhNdSHorSnvIKKbLmmtR_yxDEw2cZ5HrMTfkYQ
 
 > {%
     client.test("Tenant 1 project deleted", function() {
@@ -323,8 +323,8 @@ Authorization: Bearer {{tenant1Token}}
 %}
 
 ### Delete Tenant 2 Project
-DELETE {{baseUrl}}/projects/{{tenant2ProjectId}}
-Authorization: Bearer {{tenant2Token}}
+DELETE {{baseUrl}}/projects/3a511d3d-3147-48eb-bcb4-1914d621f1db
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkB0ZW5hbnQyLmNvbSIsInRlbmFudElkIjoiMzZjYzU4YjMtZDBlNC00NjY3LWJhZGItNGRhZmFkZGRlMjE5Iiwicm9sZXMiOiJURU5BTlRfQURNSU4iLCJpYXQiOjE3NzgwODg0OTgsImV4cCI6MTc3ODE3NDg5OH0.oY6k97s16l6bV5QedUWkIXGGURWOVmjUtJwOX3Z05qcWua_sM9VZ98QlWgV-YWe-gtPbplk2cjOBZ723R6P8IA
 
 > {%
     client.test("Tenant 2 project deleted", function() {

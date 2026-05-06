@@ -14,4 +14,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     // Tenant-isolated queries
     Optional<User> findByEmailAndTenantId(String email, UUID tenantId);
     java.util.List<User> findByTenantId(UUID tenantId);
+    java.util.Optional<User> findByIdAndTenantId(UUID id, UUID tenantId);
 }

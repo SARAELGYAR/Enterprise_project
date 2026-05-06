@@ -4,6 +4,7 @@ import com.workhub.model.Project;
 import com.workhub.service.ProjectService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,30 +20,31 @@ public class ProjectController {
         this.projectService = projectService;
     }
 
+    @PreAuthorize("hasRole('TENANT_ADMIN')")
     @PostMapping
     public ResponseEntity<Project> createProject(@Valid @RequestBody Project project) {
-        Project createdProject = projectService.createProject(project);
-        return ResponseEntity.ok(createdProject);
+        return ResponseEntity.ok(projectService.createProject(project));
     }
 
+    @PreAuthorize("hasRole('TENANT_ADMIN') or hasRole('MEMBER')")
     @GetMapping
     public ResponseEntity<List<Project>> getAllProjects() {
-        List<Project> projects = projectService.getAllProjects();
-        return ResponseEntity.ok(projects);
+        return ResponseEntity.ok(projectService.getAllProjects());
     }
 
+    @PreAuthorize("hasRole('TENANT_ADMIN') or hasRole('MEMBER')")
     @GetMapping("/{id}")
     public ResponseEntity<Project> getProjectById(@PathVariable UUID id) {
-        Project project = projectService.getProjectById(id);
-        return ResponseEntity.ok(project);
+        return ResponseEntity.ok(projectService.getProjectById(id));
     }
 
+    @PreAuthorize("hasRole('TENANT_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Project> updateProject(@PathVariable UUID id, @Valid @RequestBody Project projectDetails) {
-        Project updatedProject = projectService.updateProject(id, projectDetails);
-        return ResponseEntity.ok(updatedProject);
+        return ResponseEntity.ok(projectService.updateProject(id, projectDetails));
     }
 
+    @PreAuthorize("hasRole('TENANT_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable UUID id) {
         projectService.deleteProject(id);

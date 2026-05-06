@@ -2,6 +2,8 @@ package com.workhub.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final TenantFilter tenantFilter;
@@ -34,6 +37,12 @@ public class SecurityConfig {
                                 AntPathRequestMatcher.antMatcher("/actuator/metrics/**"),
                                 AntPathRequestMatcher.antMatcher("/actuator/prometheus")
                         ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/projects").hasRole("TENANT_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/tasks").hasRole("TENANT_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users").hasRole("TENANT_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/users").hasRole("TENANT_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/projects/**").hasRole("TENANT_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/tasks/**").hasRole("TENANT_ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(tenantFilter, UsernamePasswordAuthenticationFilter.class)
