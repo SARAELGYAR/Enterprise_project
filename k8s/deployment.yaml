@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workhub-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: workhub
+  template:
+    metadata:
+      labels:
+        app: workhub
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:15-alpine
+          command:
+            - sh
+            - -c
+            - until pg_isready -h postgres-service -p 5432; do echo waiting for postgres; sleep 2; done
+        - name: wait-for-rabbitmq
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - until nc -z rabbitmq-service 5672; do echo waiting for rabbitmq; sleep 2; done
+      containers:
+        - name: workhub
+          image: workhub-app:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: workhub-config
+            - secretRef:
+                name: workhub-secret
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080

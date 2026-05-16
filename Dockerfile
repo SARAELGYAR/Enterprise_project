@@ -7,7 +7,10 @@ COPY gradle gradle/
 COPY build.gradle ./
 COPY src src/
 
-RUN chmod +x gradlew && ./gradlew bootJar --no-daemon -x test
+# Install dos2unix and fix line endings, update CA certificates for TLS
+RUN apt-get update && apt-get install -y dos2unix ca-certificates-java && \
+    chmod +x gradlew && dos2unix gradlew && \
+    ./gradlew bootJar --no-daemon -x test
 
 # Runtime stage
 FROM eclipse-temurin:17-jre
