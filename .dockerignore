@@ -1,0 +1,9 @@
+.git
+.github
+.gradle
+build
+target
+.vscode
+*.log
+*.md
+Enterprise_project_SUBMIT.zip
