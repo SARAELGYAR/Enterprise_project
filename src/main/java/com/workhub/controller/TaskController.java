@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -23,16 +24,16 @@ public class TaskController {
     @PreAuthorize("hasRole('TENANT_ADMIN')")
     @PostMapping
     public ResponseEntity<TaskItem> createTask(@Valid @RequestBody TaskItem task) {
-        return ResponseEntity.ok(taskService.createTask(task));
+        return ResponseEntity.status(201).body(taskService.createTask(task));
     }
 
-    @PreAuthorize("hasRole('TENANT_ADMIN') or hasRole('MEMBER')")
+    @PreAuthorize("hasRole('TENANT_ADMIN') or hasRole('TENANT_USER')")
     @GetMapping
     public ResponseEntity<List<TaskItem>> getAllTasks() {
         return ResponseEntity.ok(taskService.getAllTasks());
     }
 
-    @PreAuthorize("hasRole('TENANT_ADMIN') or hasRole('MEMBER')")
+    @PreAuthorize("hasRole('TENANT_ADMIN') or hasRole('TENANT_USER')")
     @GetMapping("/{id}")
     public ResponseEntity<TaskItem> getTaskById(@PathVariable UUID id) {
         return ResponseEntity.ok(taskService.getTaskById(id));
@@ -42,6 +43,12 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<TaskItem> updateTask(@PathVariable UUID id, @Valid @RequestBody TaskItem taskDetails) {
         return ResponseEntity.ok(taskService.updateTask(id, taskDetails));
+    }
+
+    @PreAuthorize("hasRole('TENANT_ADMIN') or hasRole('TENANT_USER')")
+    @PatchMapping("/{id}")
+    public ResponseEntity<TaskItem> patchTask(@PathVariable UUID id, @RequestBody Map<String, Object> updates) {
+        return ResponseEntity.ok(taskService.patchTaskWithOptimisticLock(id, updates));
     }
 
     @PreAuthorize("hasRole('TENANT_ADMIN')")

@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
@@ -29,6 +30,12 @@ public class TaskItem {
 
     @Column(nullable = false)
     private String status;
+
+    @Column(nullable = false)
+    private int counter = 0;
+
+    @Version
+    private Long version;
 
     public UUID getId() {
         return id;
@@ -68,5 +75,21 @@ public class TaskItem {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public int getCounter() {
+        return counter;
+    }
+
+    public void setCounter(int counter) {
+        this.counter = counter;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }
