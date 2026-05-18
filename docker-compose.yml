@@ -37,13 +37,20 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/workhub
-      SPRING_DATASOURCE_USERNAME: workhub
-      SPRING_DATASOURCE_PASSWORD: workhub123
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      JWT_SECRET: mySecretKey123456789012345678901234567890
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: workhub
+      DB_USER: workhub
+      DB_PASSWORD: workhub123
+      JWT_SECRET: change-this-in-prod-change-this-in-prod-change-this-in-prod-change-this
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     restart: on-failure
 
