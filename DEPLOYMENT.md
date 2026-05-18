@@ -51,7 +51,7 @@ App runs at: http://localhost:8080
 
 ### Verify probes
 ```bash
-curl http://localhost:8080/actuator/healt]h/readiness
+curl http://localhost:8080/actuator/health/readiness
 curl http://localhost:8080/actuator/health/liveness
 ```
 
