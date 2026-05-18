@@ -11,6 +11,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -23,13 +24,15 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
-    // Minimum safe size for HS512 is 64 bytes.
-    private final String jwtSecret = "change-this-in-prod-change-this-in-prod-change-this-in-prod-change-this";
+    private final String jwtSecret;
     private final long jwtExpirationMs = 86400000; // 1 day
 
-    public AuthService(AuthenticationManager authenticationManager, UserRepository userRepository) {
+    public AuthService(AuthenticationManager authenticationManager,
+                       UserRepository userRepository,
+                       @Value("${jwt.secret}") String jwtSecret) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
+        this.jwtSecret = jwtSecret;
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -49,7 +52,7 @@ public class AuthService {
                 .claim("roles", user.getRoles())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-                .signWith(signingKey, SignatureAlgorithm.HS512)
+                .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
 
         return new LoginResponse(token);

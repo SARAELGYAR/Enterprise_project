@@ -25,11 +25,12 @@ import java.util.ArrayList;
 public class TenantFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
-    private final String jwtSecret;
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     public TenantFilter(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
-        this.jwtSecret = "change-this-in-prod-change-this-in-prod-change-this-in-prod-change-this";
     }
 
     @Override

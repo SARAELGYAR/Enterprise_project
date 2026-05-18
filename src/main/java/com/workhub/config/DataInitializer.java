@@ -37,7 +37,7 @@ public class DataInitializer {
                 member1.setEmail("member@tenant1.com");
                 member1.setPasswordHash(passwordEncoder.encode("password123"));
                 member1.setTenantId(tenant1.getId());
-                member1.setRoles("MEMBER");
+                member1.setRoles("TENANT_USER");
                 userRepository.save(member1);
 
                 System.out.println("Tenant 1 ID: " + tenant1.getId());
