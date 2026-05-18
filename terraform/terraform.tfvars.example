@@ -1,0 +1,6 @@
+kubeconfig_path  = "~/.kube/config"
+namespace        = "workhub"
+app_image        = "workhub-app:latest"
+db_password      = "workhub123"
+jwt_secret       = "mySecretKey123456789012345678901234567890"
+rabbitmq_password = "guest"
