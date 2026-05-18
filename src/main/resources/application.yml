@@ -1,4 +1,9 @@
 spring:
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
   datasource:
     # Postgres is the real runtime DB. Create database DB_NAME before first boot (example: CREATE DATABASE workhub;)
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:workhub}${DB_EXTRA_JDBC_PARAMS:}
@@ -37,6 +42,15 @@ management:
       enabled: true
     readinessstate:
       enabled: true
+
+jwt:
+  secret: ${JWT_SECRET:change-this-in-prod-change-this-in-prod-change-this-in-prod-change-this}
+
+workhub:
+  messaging:
+    report-queue: report.generation
+    report-exchange: workhub.reports
+    report-routing-key: report.generate
 
 logging:
   pattern:

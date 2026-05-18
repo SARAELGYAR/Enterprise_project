@@ -1,0 +1,43 @@
+package com.workhub.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+import java.time.Instant;
+
+@Entity
+@Table(name = "processed_messages")
+public class ProcessedMessage {
+
+    @Id
+    @Column(name = "message_id", nullable = false)
+    private String messageId;
+
+    @Column(name = "processed_at", nullable = false)
+    private Instant processedAt = Instant.now();
+
+    public ProcessedMessage() {
+    }
+
+    public ProcessedMessage(String messageId) {
+        this.messageId = messageId;
+    }
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
+
+    public Instant getProcessedAt() {
+        return processedAt;
+    }
+
+    public void setProcessedAt(Instant processedAt) {
+        this.processedAt = processedAt;
+    }
+}
